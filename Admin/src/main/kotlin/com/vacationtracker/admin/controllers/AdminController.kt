@@ -11,8 +11,8 @@ import java.util.*
 class AdminController(private val adminService: AdminService) {
 
     @GetMapping
-    fun index(): String? {
-        return "Admin works!"
+    fun index(): ResponseEntity<String> {
+        return ResponseEntity.ok("Admin works!")
     }
 
     @PostMapping("/importEmployees")
