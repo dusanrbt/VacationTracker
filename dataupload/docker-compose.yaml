@@ -1,0 +1,29 @@
+version: '3.0'
+
+services:
+  db:
+    image: 'postgres'
+    container_name: db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=vacationtracker
+      #- POSTGRES_HOST_AUTH_METHOD=trust
+  upload-service:
+    image: 'upload'
+    container_name: upload-service
+    build: ./
+    depends_on:
+      - db
+    ports:
+      - "8081:8081"
+  search-service:
+    image: 'search'
+    container_name: search-service
+    build: ../datasearch
+    depends_on:
+      - db
+    ports:
+      - "8080:8080"
