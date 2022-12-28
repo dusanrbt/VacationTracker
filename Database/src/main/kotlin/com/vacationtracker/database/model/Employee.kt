@@ -18,10 +18,10 @@ data class Employee(
 
     @ElementCollection
     @CollectionTable(
-        name = "employeeTotalVacationDays",
-        joinColumns = [JoinColumn(name = "employeeId", referencedColumnName = "id")]
+        name = "employee_total_vacation_days",
+        joinColumns = [JoinColumn(name = "employee_id", referencedColumnName = "id")]
     )
     @MapKeyColumn(name = "year")
-    @Column(name = "vacationDays")
+    @Column(name = "vacation_days")
     var totalVacationDays: MutableMap<Int, Int> = HashMap()
 )

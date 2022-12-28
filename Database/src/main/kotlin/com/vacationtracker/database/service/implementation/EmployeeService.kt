@@ -11,6 +11,11 @@ import org.springframework.stereotype.Component
 @Component
 class EmployeeService : IEmployeeService {
 
+    companion object Constants {
+        private const val EMPLOYEE_NOT_FOUND_MSG: String = "Employee not found."
+        private const val NO_YEAR_IN_AVAILABLE_VACATIONS: String = "Given year does not exist in employee available vacations list: "
+    }
+
     @Autowired
     private lateinit var employeeRepository: EmployeeRepository
 
@@ -29,7 +34,7 @@ class EmployeeService : IEmployeeService {
     override fun findByEmail(employeeEmail: String): Employee {
         val employee = employeeRepository.findByEmail(employeeEmail)
         if (employee.isEmpty) {
-            throw EmployeeNotFoundException("Employee not found.")
+            throw EmployeeNotFoundException(EMPLOYEE_NOT_FOUND_MSG)
         }
 
         return employee.get()
@@ -38,13 +43,13 @@ class EmployeeService : IEmployeeService {
     override fun getVacationDaysPerYear(employeeEmail: String, year: Int): Int {
         val employeeOptional = employeeRepository.findByEmail(employeeEmail)
         if (employeeOptional.isEmpty) {
-            throw EmployeeNotFoundException("Employee not found.")
+            throw EmployeeNotFoundException(EMPLOYEE_NOT_FOUND_MSG)
         }
 
         val employee = employeeOptional.get()
 
         if (!employee.totalVacationDays.containsKey(year)) {
-            throw NoYearInVacationDaysException("Employee doesn't have year $year in totalVacationDays.")
+            throw NoYearInVacationDaysException(NO_YEAR_IN_AVAILABLE_VACATIONS + year)
         }
 
         return employee.totalVacationDays.getValue(year)
@@ -53,7 +58,7 @@ class EmployeeService : IEmployeeService {
     override fun findById(employeeId: Long): Employee {
         val employee = employeeRepository.findById(employeeId)
         if (employee.isEmpty) {
-            throw EmployeeNotFoundException("Employee not found.")
+            throw EmployeeNotFoundException(EMPLOYEE_NOT_FOUND_MSG)
         }
 
         return employee.get()

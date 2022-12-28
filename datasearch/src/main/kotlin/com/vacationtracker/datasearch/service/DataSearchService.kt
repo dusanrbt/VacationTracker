@@ -10,6 +10,10 @@ import java.text.SimpleDateFormat
 @Service
 class DataSearchService {
 
+    companion object Constants {
+        private const val DATE_FORMAT: String = "yyyy-MM-dd"
+    }
+
     @Autowired
     private lateinit var employeeService: EmployeeService
 
@@ -17,17 +21,17 @@ class DataSearchService {
     private lateinit var vacationService: VacationService
 
     fun getVacationDaysPerYear(employeeEmail: String, year: Int): List<Int?> {
+        val totalDays = employeeService.getVacationDaysPerYear(employeeEmail, year)
         val employee = employeeService.findByEmail(employeeEmail)
-        val totalDays = employee.totalVacationDays[year]
         val usedDays = vacationService.countAllByEmployee(employee)
-        val availableDays = totalDays?.minus(usedDays)
+        val availableDays = totalDays.minus(usedDays)
 
         return listOf(totalDays, usedDays, availableDays)
     }
 
     fun getUsedVacationDaysForTimePeriod(employeeEmail: String, startDateString: String, endDateString: String): List<Vacation> {
         val employee = employeeService.findByEmail(employeeEmail)
-        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val formatter = SimpleDateFormat(DATE_FORMAT)
         val startDate = formatter.parse(startDateString)
         val endDate = formatter.parse(endDateString)
 
@@ -36,7 +40,7 @@ class DataSearchService {
 
     fun insertNewRecord(employeeEmail: String, startDateString: String, endDateString: String): Long {
         val employee = employeeService.findByEmail(employeeEmail)
-        val formatter = SimpleDateFormat("yyyy-MM-dd")
+        val formatter = SimpleDateFormat(DATE_FORMAT)
         val startDate = formatter.parse(startDateString)
         val endDate = formatter.parse(endDateString)
 

@@ -17,6 +17,6 @@ data class Vacation(
 
     @JsonIgnore
     @ManyToOne
-    @JoinColumn(name = "employeeId", referencedColumnName = "id")
+    @JoinColumn(name = "employee_id", referencedColumnName = "id")
     var employee: Employee = Employee()
 )

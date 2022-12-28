@@ -10,7 +10,9 @@ import java.util.*
 @RestController
 class DataUploadController {
 
-    private val IMPORT_SUCCESSFUL = "Import successful."
+    companion object Constants {
+        private const val IMPORT_SUCCESSFUL_MSG: String = "Import successful."
+    }
 
     @Autowired
     private lateinit var dataUploadService: DataUploadService
@@ -19,20 +21,20 @@ class DataUploadController {
     fun importEmployeeProfiles(@RequestParam file: MultipartFile): ResponseEntity<String> {
         val employeesCount = dataUploadService.importEmployeeProfiles(file)
 
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL Number of employees: $employeesCount")
+        return ResponseEntity.ok("$IMPORT_SUCCESSFUL_MSG Number of employees: $employeesCount")
     }
 
     @PostMapping("/importUsedVacations")
     fun importUsedVacations(@RequestParam file: MultipartFile): ResponseEntity<String> {
         val usedVacationsCount = dataUploadService.importUsedVacations(file)
 
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL Number of used vacations: $usedVacationsCount")
+        return ResponseEntity.ok("$IMPORT_SUCCESSFUL_MSG Number of used vacations: $usedVacationsCount")
     }
 
     @PostMapping("/importAvailableVacationDaysPerYear")
     fun importAvailableVacationDaysPerYear(@RequestParam file: MultipartFile): ResponseEntity<String> {
         val availableVacationsCount = dataUploadService.importAvailableVacationDaysPerYear(file)
 
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL Number of available vacations: $availableVacationsCount")
+        return ResponseEntity.ok("$IMPORT_SUCCESSFUL_MSG Number of available vacations: $availableVacationsCount")
     }
 }

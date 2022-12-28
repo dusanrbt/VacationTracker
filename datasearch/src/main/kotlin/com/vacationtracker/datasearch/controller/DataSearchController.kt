@@ -9,8 +9,10 @@ import org.springframework.web.bind.annotation.*
 @RestController
 class DataSearchController {
 
-    private val IMPORT_SUCCESSFUL = "Import successful."
-
+    companion object Constants {
+        private const val IMPORT_SUCCESSFUL = "Import successful."
+        private const val DATE_FORMAT: String = "yyyy-MM-dd"
+    }
     @Autowired
     private lateinit var dataSearchService: DataSearchService
 
