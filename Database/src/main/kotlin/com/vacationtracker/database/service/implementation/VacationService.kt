@@ -26,6 +26,10 @@ class VacationService : IVacationService {
         return vacation.id
     }
 
+    override fun deleteAll() {
+        vacationRepository.deleteAll()
+    }
+
     override fun countAllByEmployee(employee: Employee): Int {
         return vacationRepository.countAllByEmployee(employee)
     }

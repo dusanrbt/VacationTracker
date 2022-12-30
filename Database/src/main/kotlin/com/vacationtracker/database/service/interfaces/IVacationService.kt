@@ -11,6 +11,8 @@ interface IVacationService {
 
     fun save(vacation: Vacation): Long
 
+    fun deleteAll()
+
     fun countAllByEmployee(employee: Employee): Int
 
     fun findRecordsForTimePeriod(employee: Employee, startDate: Date, endDate: Date): List<Vacation>

@@ -9,6 +9,7 @@ data class Employee(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     var id: Long = 0,
 
+    @Column(unique = true)
     var email: String = "",
 
     var password: String = "",

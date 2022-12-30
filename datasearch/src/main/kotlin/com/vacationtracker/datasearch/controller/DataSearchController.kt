@@ -1,46 +1,44 @@
 package com.vacationtracker.datasearch.controller
 
+import com.vacationtracker.database.dto.MessageDTO
+import com.vacationtracker.database.dto.VacationDaysDTO
 import com.vacationtracker.database.model.Vacation
 import com.vacationtracker.datasearch.service.DataSearchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import java.security.Principal
 
 @RestController
 class DataSearchController {
 
-    companion object Constants {
-        private const val IMPORT_SUCCESSFUL = "Import successful."
-        private const val DATE_FORMAT: String = "yyyy-MM-dd"
-    }
     @Autowired
     private lateinit var dataSearchService: DataSearchService
 
     @GetMapping("/getVacationDaysPerYear")
-    fun getVacationDaysPerYear(@RequestParam employeeEmail: String, @RequestParam year: Int): ResponseEntity<String> {
-        val vacationDaysList = dataSearchService.getVacationDaysPerYear(employeeEmail, year)
-        val totalDays = vacationDaysList[0]
-        val usedDays = vacationDaysList[1]
-        val availableDays = vacationDaysList[2]
+    fun getVacationDaysPerYear(principal: Principal, @RequestParam year: Int): ResponseEntity<VacationDaysDTO> {
+        val vacationDays = dataSearchService.getVacationDaysPerYear(principal.name, year)
 
-        return ResponseEntity.ok("Total days: $totalDays; Used days: $usedDays; Available days: $availableDays.")
+        return ResponseEntity.ok(
+            VacationDaysDTO(
+                totalDays = vacationDays[0], usedDays = vacationDays[1], availableDays = vacationDays[2]
+            )
+        )
     }
 
     @GetMapping("/getUsedVacationDaysForTimePeriod")
     fun getUsedVacationDaysForTimePeriod(
-        @RequestParam employeeEmail: String, @RequestParam startDate: String, @RequestParam endDate: String
+        principal: Principal, @RequestParam startDate: String, @RequestParam endDate: String
     ): ResponseEntity<List<Vacation>> {
-        val vacations = dataSearchService.getUsedVacationDaysForTimePeriod(employeeEmail, startDate, endDate)
-
-        return ResponseEntity.ok(vacations)
+        return ResponseEntity.ok(dataSearchService.getUsedVacationDaysForTimePeriod(principal.name, startDate, endDate))
     }
 
     @PostMapping("/insertNewRecord")
     fun insertNewRecord(
-        @RequestParam employeeEmail: String, @RequestParam startDate: String, @RequestParam endDate: String
-    ): ResponseEntity<String> {
-        val vacationId = dataSearchService.insertNewRecord(employeeEmail, startDate, endDate)
+        principal: Principal, @RequestParam startDate: String, @RequestParam endDate: String
+    ): ResponseEntity<MessageDTO> {
+        val vacationId = dataSearchService.insertNewRecord(principal.name, startDate, endDate)
 
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL New vacation ID: $vacationId")
+        return ResponseEntity.ok(MessageDTO("New vacation ID: $vacationId"))
     }
 }

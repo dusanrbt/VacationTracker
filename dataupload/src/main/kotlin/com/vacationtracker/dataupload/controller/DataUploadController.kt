@@ -1,5 +1,7 @@
 package com.vacationtracker.dataupload.controller
 
+import com.vacationtracker.database.dto.ExceptionDTO
+import com.vacationtracker.database.dto.MessageDTO
 import com.vacationtracker.dataupload.service.DataUploadService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -10,31 +12,32 @@ import java.util.*
 @RestController
 class DataUploadController {
 
-    companion object Constants {
-        private const val IMPORT_SUCCESSFUL_MSG: String = "Import successful."
-    }
-
     @Autowired
     private lateinit var dataUploadService: DataUploadService
 
     @PostMapping("/importEmployeeProfiles")
-    fun importEmployeeProfiles(@RequestParam file: MultipartFile): ResponseEntity<String> {
-        val employeesCount = dataUploadService.importEmployeeProfiles(file)
-
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL_MSG Number of employees: $employeesCount")
+    fun importEmployeeProfiles(@RequestParam file: MultipartFile): ResponseEntity<MessageDTO> {
+        return ResponseEntity.ok(MessageDTO(dataUploadService.importEmployeeProfiles(file)))
     }
 
     @PostMapping("/importUsedVacations")
-    fun importUsedVacations(@RequestParam file: MultipartFile): ResponseEntity<String> {
-        val usedVacationsCount = dataUploadService.importUsedVacations(file)
-
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL_MSG Number of used vacations: $usedVacationsCount")
+    fun importUsedVacations(@RequestParam file: MultipartFile): ResponseEntity<MessageDTO> {
+        return ResponseEntity.ok(MessageDTO(dataUploadService.importUsedVacations(file)))
     }
 
     @PostMapping("/importAvailableVacationDaysPerYear")
-    fun importAvailableVacationDaysPerYear(@RequestParam file: MultipartFile): ResponseEntity<String> {
-        val availableVacationsCount = dataUploadService.importAvailableVacationDaysPerYear(file)
+    fun importAvailableVacationDaysPerYear(@RequestParam file: MultipartFile): ResponseEntity<MessageDTO> {
+        return ResponseEntity.ok(MessageDTO(dataUploadService.importAvailableVacationDaysPerYear(file)))
+    }
 
-        return ResponseEntity.ok("$IMPORT_SUCCESSFUL_MSG Number of available vacations: $availableVacationsCount")
+    @PostMapping("/clearDatabase")
+    fun clearDatabase() {
+        dataUploadService.clearDatabase()
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleException(exception: Exception): ResponseEntity<ExceptionDTO> {
+        return ResponseEntity.badRequest()
+            .body(ExceptionDTO(message = exception.message!!, status = 400, statusText = "Bad request"))
     }
 }

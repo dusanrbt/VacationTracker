@@ -9,9 +9,11 @@ interface IEmployeeService {
 
     fun save(employee: Employee): Long
 
+    fun deleteAll()
+
     fun findByEmail(employeeEmail: String): Employee
 
-    fun getVacationDaysPerYear(employeeEmail: String, year: Int): Int
+    fun getVacationDaysPerYear(employee: Employee, year: Int): Int
 
     fun findById(employeeId: Long): Employee
 }
