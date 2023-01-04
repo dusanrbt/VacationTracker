@@ -15,5 +15,7 @@ interface IVacationService {
 
     fun countAllByEmployee(employee: Employee): Int
 
+    fun findUsedVacationsPerYear(employee: Employee, year: Int): List<Vacation>
+
     fun findRecordsForTimePeriod(employee: Employee, startDate: Date, endDate: Date): List<Vacation>
 }

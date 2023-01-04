@@ -34,6 +34,10 @@ class VacationService : IVacationService {
         return vacationRepository.countAllByEmployee(employee)
     }
 
+    override fun findUsedVacationsPerYear(employee: Employee, year: Int): List<Vacation> {
+        return vacationRepository.findUsedVacationsPerYear(employee, year)
+    }
+
     override fun findRecordsForTimePeriod(employee: Employee, startDate: Date, endDate: Date): List<Vacation> {
         return vacationRepository.findRecordsForTimePeriod(employee, startDate, endDate)
     }

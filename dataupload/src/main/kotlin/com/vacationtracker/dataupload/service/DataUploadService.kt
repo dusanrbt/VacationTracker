@@ -1,5 +1,6 @@
 package com.vacationtracker.dataupload.service
 
+import com.vacationtracker.database.exception.EmployeeNotFound
 import com.vacationtracker.database.model.Employee
 import com.vacationtracker.database.model.Vacation
 import com.vacationtracker.database.service.implementation.EmployeeService
@@ -24,7 +25,9 @@ class DataUploadService {
     companion object Constants {
         private const val IMPORT_SUCCESSFUL = "Import successful."
         private const val FILE_EMPTY = "File is empty."
+        private const val FILE_NOT_UPLOADED = "File not uploaded."
         private const val ALLOWED_FILE_EXTENSION = "csv"
+        private const val USER_NON_EXISTENT = "User does not exist: line "
         private const val INVALID_FILE_EXTENSION = "File extension must be: .$ALLOWED_FILE_EXTENSION"
         private const val INVALID_YEAR_FORMAT = "Invalid year format, Int expected."
         private const val INVALID_NUMBER_OF_DAYS_FORMAT = "Invalid number of days format, Int expected."
@@ -47,6 +50,7 @@ class DataUploadService {
     private lateinit var vacationService: VacationService
 
     fun importEmployeeProfiles(file: MultipartFile): String {
+        isFileUploaded(file)
         checkFileExtension(file)
 
         val reader = BufferedReader(InputStreamReader(file.inputStream, StandardCharsets.UTF_8))
@@ -79,7 +83,7 @@ class DataUploadService {
             val numberOfColumns = it.size()
 
             if (numberOfColumns != 2) {
-                errorList += (INVALID_COLUMN_NUMBER + it.recordNumber + "\n")
+                errorList += (INVALID_COLUMN_NUMBER + it.recordNumber + ";")
                 return@forEach
             }
 
@@ -87,11 +91,11 @@ class DataUploadService {
             val password = it.get(1)
 
             if (!(email matches Regex(EMAIL_REGEX))) {
-                errorList += (INVALID_EMAIL_FORMAT + it.recordNumber + "\n")
+                errorList += (INVALID_EMAIL_FORMAT + it.recordNumber + ";")
                 return@forEach
             }
             if (password.equals("")) {
-                errorList += (INVALID_PASSWORD_FORMAT + it.recordNumber + "\n")
+                errorList += (INVALID_PASSWORD_FORMAT + it.recordNumber + ";")
                 return@forEach
             }
 
@@ -108,6 +112,7 @@ class DataUploadService {
     }
 
     fun importUsedVacations(file: MultipartFile): String {
+        isFileUploaded(file)
         checkFileExtension(file)
 
         val reader = BufferedReader(InputStreamReader(file.inputStream, StandardCharsets.UTF_8))
@@ -142,7 +147,7 @@ class DataUploadService {
             val numberOfColumns = it.size()
 
             if (numberOfColumns != 3) {
-                errorList += (INVALID_COLUMN_NUMBER + it.recordNumber + "\n")
+                errorList += (INVALID_COLUMN_NUMBER + it.recordNumber + ";")
                 return@forEach
             }
 
@@ -151,10 +156,17 @@ class DataUploadService {
             val endDateString = it.get(2)
 
             if (!(employeeEmail matches Regex(EMAIL_REGEX))) {
-                errorList += (INVALID_EMAIL_FORMAT + it.recordNumber + "\n")
+                errorList += (INVALID_EMAIL_FORMAT + it.recordNumber + ";")
                 return@forEach
             }
-            val employee = employeeService.findByEmail(employeeEmail)
+
+            val employee: Employee
+            try {
+                employee = employeeService.findByEmail(employeeEmail)
+            } catch (ex: EmployeeNotFound) {
+                errorList += (USER_NON_EXISTENT + it.recordNumber + ";")
+                return@forEach
+            }
 
             val formatter = SimpleDateFormat(DATE_FORMAT)
 
@@ -164,12 +176,12 @@ class DataUploadService {
                 startDate = formatter.parse(startDateString)
                 endDate = formatter.parse(endDateString)
             } catch (ex: ParseException) {
-                errorList += (INVALID_DATE_FORMAT + it.recordNumber + "\n")
+                errorList += (INVALID_DATE_FORMAT + it.recordNumber + ";")
                 return@forEach
             }
 
             if (startDate > endDate) {
-                errorList += (INVALID_DATE_ORDER + it.recordNumber + "\n")
+                errorList += (INVALID_DATE_ORDER + it.recordNumber + ";")
                 return@forEach
             }
 
@@ -182,6 +194,7 @@ class DataUploadService {
     }
 
     fun importAvailableVacationDaysPerYear(file: MultipartFile): String {
+        isFileUploaded(file)
         checkFileExtension(file)
 
         val reader = BufferedReader(InputStreamReader(file.inputStream, StandardCharsets.UTF_8))
@@ -226,7 +239,7 @@ class DataUploadService {
             val numberOfColumns = it.size()
 
             if (numberOfColumns != 2) {
-                errorList += (INVALID_COLUMN_NUMBER + it.recordNumber + "\n")
+                errorList += (INVALID_COLUMN_NUMBER + it.recordNumber + ";")
                 return@forEach
             }
 
@@ -234,16 +247,22 @@ class DataUploadService {
             val availableVacationDays = it.get(1)
 
             if (!(employeeEmail matches Regex(EMAIL_REGEX))) {
-                errorList += (INVALID_EMAIL_FORMAT + it.recordNumber + "\n")
+                errorList += (INVALID_EMAIL_FORMAT + it.recordNumber + ";")
                 return@forEach
             }
             if (availableVacationDays.toIntOrNull() == null) {
-                errorList += (INVALID_NUMBER_OF_DAYS_FORMAT + it.recordNumber + "\n")
+                errorList += (INVALID_NUMBER_OF_DAYS_FORMAT + it.recordNumber + ";")
                 return@forEach
             }
 
             if (it.recordNumber > 2L) {
-                val employee = employeeService.findByEmail(employeeEmail)
+                var employee: Employee
+                try {
+                    employee = employeeService.findByEmail(employeeEmail)
+                } catch (ex: EmployeeNotFound) {
+                    errorList += (USER_NON_EXISTENT + it.recordNumber + ";")
+                    return@forEach
+                }
                 employee.totalVacationDays[year] = availableVacationDays.toInt()
                 employeeService.save(employee)
             }
@@ -262,6 +281,12 @@ class DataUploadService {
 
         if (fileExtension != ALLOWED_FILE_EXTENSION) {
             throw CSVException(INVALID_FILE_EXTENSION)
+        }
+    }
+
+    private fun isFileUploaded(file: MultipartFile) {
+        if (file.isEmpty) {
+            throw CSVException(FILE_NOT_UPLOADED)
         }
     }
 }

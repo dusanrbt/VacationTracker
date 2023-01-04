@@ -1,8 +1,10 @@
 package com.vacationtracker.datasearch.controller
 
+import com.vacationtracker.database.dto.ExceptionDTO
 import com.vacationtracker.database.dto.MessageDTO
 import com.vacationtracker.database.dto.VacationDaysDTO
 import com.vacationtracker.database.model.Vacation
+import com.vacationtracker.datasearch.dto.VacationRequestDTO
 import com.vacationtracker.datasearch.service.DataSearchService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.ResponseEntity
@@ -35,10 +37,17 @@ class DataSearchController {
 
     @PostMapping("/insertNewRecord")
     fun insertNewRecord(
-        principal: Principal, @RequestParam startDate: String, @RequestParam endDate: String
+        principal: Principal, @RequestBody vacationRequestDTO: VacationRequestDTO
     ): ResponseEntity<MessageDTO> {
-        val vacationId = dataSearchService.insertNewRecord(principal.name, startDate, endDate)
+        val vacationId =
+            dataSearchService.insertNewRecord(principal.name, vacationRequestDTO.startDate, vacationRequestDTO.endDate)
 
         return ResponseEntity.ok(MessageDTO("New vacation ID: $vacationId"))
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleException(exception: Exception): ResponseEntity<ExceptionDTO> {
+        return ResponseEntity.badRequest()
+            .body(ExceptionDTO(message = exception.message!!, status = 400, statusText = "Bad request"))
     }
 }
